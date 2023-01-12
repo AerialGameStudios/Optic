@@ -1,32 +1,41 @@
-#include <SFML/Graphics.hpp>
-#include <entt/entt.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
 
-int main(int argc, char ** argv)
-{
-    sf::RenderWindow renderWindow(sf::VideoMode(sf::Vector2u(1920, 1080)), "Demo Game");
+#include <imgui-SFML.h>
+#include <imgui.h>
 
-    entt::registry sceneRegistry;
-    auto entity = sceneRegistry.create();
+int main() {
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "ImGui + SFML = <3");
+    window.setFramerateLimit(60);
+    ImGui::SFML::Init(window);
 
-    sf::Event event;
+    sf::Clock deltaClock;
+    window.resetGLStates();
 
-    sf::CircleShape circleShape(200);
-    circleShape.setFillColor(sf::Color::Blue);
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    sf::View view1 = sf::View(sf::Vector2f(0.f, 0.f), sf::Vector2f(1920.f, 1080.f));
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            ImGui::SFML::ProcessEvent(event);
 
-    while (renderWindow.isOpen())
-    {
-
-        while (renderWindow.pollEvent(event)){
-        if (event.type == sf::Event::EventType::Closed)
-            renderWindow.close();
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
         }
 
-        renderWindow.clear();
-        renderWindow.draw(circleShape);
-        renderWindow.display();
+        ImGui::SFML::Update(window, deltaClock.restart());
+
+        ImGui::ShowDemoWindow();
+
+        window.clear();
+        ImGui::SFML::Render(window);
+        window.display();
     }
 
+    ImGui::SFML::Shutdown();
 
+    return 0;
 }
